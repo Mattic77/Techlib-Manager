@@ -1,9 +1,9 @@
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    MYSQL_ROOT_PASSWORD: str = "secret"
+    MYSQL_ROOT_PASSWORD: str = "matiic"
     MYSQL_DATABASE: str = "techlib"
-    DATABASE_URL: str = "mysql+aiomysql://root:secret@mysql:3306/techlib"
+    DATABASE_URL: str = "mysql+aiomysql://root:matiic@mysql:3306/techlib"
     REDIS_URL: str = "redis://redis:6379/0"
     QDRANT_URL: str = "http://qdrant:6333"
     JWT_SECRET: str = "supersecretjwtkey_change_me_in_production"
