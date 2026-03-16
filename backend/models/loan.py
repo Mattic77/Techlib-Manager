@@ -1,7 +1,8 @@
 import enum
-from sqlalchemy import Column, String, Enum, DateTime, ForeignKey, func
-from backend.core.database import Base
 import uuid
+from sqlalchemy import Column, String, Enum, DateTime, ForeignKey, func
+from sqlalchemy.orm import relationship
+from backend.core.database import Base
 
 class LoanStatus(str, enum.Enum):
     active = 'active'
@@ -18,3 +19,5 @@ class Loan(Base):
     due_date = Column(DateTime, nullable=False)
     return_date = Column(DateTime)
     status = Column(Enum(LoanStatus), default=LoanStatus.active)
+
+    document = relationship("Document")

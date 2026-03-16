@@ -19,16 +19,9 @@ app.include_router(documents.router, prefix="/api")
 app.include_router(loans.router, prefix="/api")
 app.include_router(ai.router, prefix="/api")
 
-origins = [
-    "http://localhost",
-    "http://localhost:3000",
-    "http://127.0.0.1",
-    "http://127.0.0.1:3000",
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

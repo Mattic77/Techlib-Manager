@@ -22,28 +22,39 @@ const LoginPage: React.FC = () => {
 
     try {
       if (isLogin) {
-        const formData = new FormData();
-        formData.append('username', username);
-        formData.append('password', password);
+        // OAuth2 Password Request Form expects URL encoded data
+        const params = new URLSearchParams();
+        params.append('username', username); // This can be username or email now
+        params.append('password', password);
         
-        const loginRes = await authApi.login(formData);
+        const loginRes = await authApi.login(params);
         const { access_token } = loginRes.data;
         
-        // Get user info with the new token
-        const userRes = await fetch('/api/users/me', {
-          headers: { 'Authorization': `Bearer ${access_token}` }
-        });
-        const userData = await userRes.json();
+        // Save token immediately so following API calls work
+        // We set only token first, then fetch user data
+        useAuthStore.setState({ token: access_token });
+
+        // Get user info using the centralized API client (which now has the token)
+        const userRes = await authApi.getMe();
+        const userData = userRes.data;
         
         setAuth(userData, access_token);
         navigate('/');
       } else {
         await authApi.register({ username, email, password });
         setIsLogin(true);
-        alert('Registration successful! Please login.');
+        alert('Registration successful! Please sign in with your new account.');
       }
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'An error occurred. Please try again.');
+      console.error('Login error:', err);
+      const detail = err.response?.data?.detail;
+      setError(
+        typeof detail === 'string' 
+          ? detail 
+          : 'Invalid credentials or server error. Please try again.'
+      );
+      // Clean up partial state on error
+      useAuthStore.getState().logout();
     } finally {
       setIsLoading(false);
     }

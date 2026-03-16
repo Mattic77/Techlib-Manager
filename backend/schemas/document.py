@@ -13,6 +13,11 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
 
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
+
 class UserResponse(UserBase):
     id: str
     role: UserRole
@@ -47,11 +52,18 @@ class DocumentUpdate(DocumentBase):
 class DocumentResponse(DocumentBase):
     id: str
     availability: bool
+    archived: bool
     created_at: datetime
     updated_at: datetime
 
     class Config:
         from_attributes = True
+
+class DashboardStats(BaseModel):
+    total_documents: int
+    active_loans: int
+    total_users: int
+    overdue_loans: int
 
 # Loan Schemas
 class LoanBase(BaseModel):
@@ -69,6 +81,7 @@ class LoanResponse(BaseModel):
     due_date: datetime
     return_date: Optional[datetime] = None
     status: LoanStatus
+    document: Optional[DocumentResponse] = None
 
     class Config:
         from_attributes = True

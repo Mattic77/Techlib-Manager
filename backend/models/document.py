@@ -16,5 +16,6 @@ class Document(Base):
     physical_location = Column(String(50))
     digital_format = Column(String(10))
     availability = Column(Boolean, default=True)
+    archived = Column(Boolean, default=False)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())

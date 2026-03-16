@@ -8,10 +8,15 @@ import {
   BookOpen, 
   LogOut,
   User as UserIcon,
-  Search
+  Search,
+  LayoutDashboard,
+  ShieldCheck,
+  History,
+  Users as UsersIcon
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { UserRole } from '../types';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -38,6 +43,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { name: 'AI Assistant', path: '/chat', icon: MessageSquare },
   ];
 
+  const adminItems = [
+    { name: 'Command Center', path: '/admin', icon: LayoutDashboard },
+    { name: 'Inventory', path: '/admin/documents', icon: ShieldCheck },
+    { name: 'Active Loans', path: '/admin/loans', icon: History },
+    { name: 'User Management', path: '/admin/users', icon: UsersIcon },
+  ];
+
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
       {/* Sidebar */}
@@ -49,34 +61,61 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </h1>
         </div>
 
-        <nav className="flex-1 px-4 space-y-1 mt-4">
-          {navItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={cn(
-                "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
-                location.pathname === item.path 
-                  ? "bg-primary-800 text-white" 
-                  : "text-primary-300 hover:bg-primary-800/50 hover:text-white"
-              )}
-            >
-              <item.icon className="w-5 h-5" />
-              <span className="font-medium">{item.name}</span>
-            </Link>
-          ))}
-        </nav>
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-8">
+          <nav className="space-y-1">
+            <p className="px-4 text-[10px] font-bold text-primary-400 uppercase tracking-widest mb-2">Library</p>
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={cn(
+                  "flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
+                  location.pathname === item.path 
+                    ? "bg-primary-800 text-white shadow-lg shadow-black/10" 
+                    : "text-primary-300 hover:bg-primary-800/50 hover:text-white"
+                )}
+              >
+                <item.icon className="w-5 h-5" />
+                <span className="text-sm font-medium">{item.name}</span>
+              </Link>
+            ))}
+          </nav>
+
+          {user?.role !== UserRole.READER && (
+            <nav className="space-y-1">
+              <p className="px-4 text-[10px] font-bold text-primary-400 uppercase tracking-widest mb-2">Administrative</p>
+              {adminItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
+                    location.pathname.startsWith(item.path) && (item.path !== '/admin' || location.pathname === '/admin')
+                      ? "bg-primary-800 text-white shadow-lg shadow-black/10" 
+                      : "text-primary-300 hover:bg-primary-800/50 hover:text-white"
+                  )}
+                >
+                  <item.icon className="w-5 h-5" />
+                  <span className="text-sm font-medium">{item.name}</span>
+                </Link>
+              ))}
+            </nav>
+          )}
+        </div>
 
         <div className="p-4 border-t border-primary-800">
-          <div className="flex items-center gap-3 px-4 py-3 mb-2">
-            <div className="w-8 h-8 rounded-full bg-primary-700 flex items-center justify-center">
+          <Link
+            to="/profile"
+            className="flex items-center gap-3 px-4 py-3 mb-2 rounded-xl hover:bg-primary-800 transition-colors group"
+          >
+            <div className="w-8 h-8 rounded-full bg-primary-700 flex items-center justify-center group-hover:bg-primary-600 transition-colors">
               <UserIcon className="w-5 h-5" />
             </div>
             <div className="flex-1 overflow-hidden text-sm">
-              <p className="font-medium truncate">{user?.username}</p>
+              <p className="font-medium truncate group-hover:text-white">{user?.username}</p>
               <p className="text-primary-400 text-xs truncate capitalize">{user?.role}</p>
             </div>
-          </div>
+          </Link>
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-2 text-primary-300 hover:text-white transition-colors"

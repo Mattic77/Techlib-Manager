@@ -2,6 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { documentApi, aiApi } from '../api';
 import { useAuthStore } from '../store/authStore';
+import { Link } from 'react-router-dom';
 import BookCard from '../components/Dashboard/BookCard';
 import { 
   BarChart3, 
@@ -102,10 +103,13 @@ const DashboardPage: React.FC = () => {
             </div>
             <h3 className="text-xl font-bold text-primary-900">Recommended for You</h3>
           </div>
-          <button className="text-sm font-bold text-primary-600 flex items-center gap-1 hover:text-primary-700 transition-colors">
+          <Link 
+            to="/catalog"
+            className="text-sm font-bold text-primary-600 flex items-center gap-1 hover:text-primary-700 transition-colors"
+          >
             View All Recommendations
             <ArrowRight className="w-4 h-4" />
-          </button>
+          </Link>
         </div>
 
         {recLoading ? (

@@ -42,4 +42,11 @@ export interface Loan {
   due_date: string;
   return_date: string | null;
   status: LoanStatus;
+  document?: Document;
+}
+
+export interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+  suggestedDocs?: string[]; // Array of doc IDs
 }

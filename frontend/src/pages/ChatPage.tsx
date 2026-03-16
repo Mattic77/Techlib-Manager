@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuthStore } from '../store/authStore';
+import { useChatStore } from '../store/chatStore';
 import { 
   MessageSquare, 
   Send, 
@@ -11,31 +12,28 @@ import {
   Library,
   Terminal,
   Cpu,
-  RefreshCw
+  RefreshCw,
+  Trash2
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { clsx } from 'clsx';
 import { documentApi } from '../api';
-import { Document } from '../types';
+import { Document, Message } from '../types';
 import { Link } from 'react-router-dom';
-
-interface Message {
-  role: 'user' | 'assistant';
-  content: string;
-  suggestedDocs?: string[]; // Array of doc IDs
-}
 
 const ChatPage: React.FC = () => {
   const { user, token } = useAuthStore();
-  const [messages, setMessages] = useState<Message[]>([
-    { 
-      role: 'assistant', 
-      content: `Hello ${user?.username}! I'm your TechLib AI Librarian. I can help you find technical documentation, summarize complex topics, or recommend books from our collection. What are you looking for today?` 
-    }
-  ]);
+  const { 
+    messages, 
+    mentionedDocs, 
+    addMessage, 
+    updateLastMessage, 
+    addMentionedDocs, 
+    clearChat 
+  } = useChatStore();
+  
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [mentionedDocs, setMentionedDocs] = useState<Document[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -45,6 +43,16 @@ const ChatPage: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Initial greeting if no messages
+  useEffect(() => {
+    if (messages.length === 0 && user) {
+      addMessage({ 
+        role: 'assistant', 
+        content: `Hello ${user.username}! I'm your TechLib AI Librarian. I can help you find technical documentation, summarize complex topics, or recommend books from our collection. What are you looking for today?` 
+      });
+    }
+  }, [messages.length, user, addMessage]);
 
   const fetchDocDetails = async (ids: string[]) => {
     try {
@@ -56,7 +64,7 @@ const ChatPage: React.FC = () => {
         const res = await documentApi.get(id);
         newDocs.push(res.data);
       }
-      setMentionedDocs(prev => [...prev, ...newDocs]);
+      addMentionedDocs(newDocs);
     } catch (error) {
       console.error("Failed to fetch mentioned docs", error);
     }
@@ -67,15 +75,14 @@ const ChatPage: React.FC = () => {
     if (!textToSend.trim() || isLoading) return;
 
     const userMessage: Message = { role: 'user', content: textToSend };
-    setMessages(prev => [...prev, userMessage]);
+    addMessage(userMessage);
     setInput('');
     setIsLoading(true);
 
     let assistantContent = '';
-    const assistantMessageIndex = messages.length + 1;
     
     // Add placeholder assistant message
-    setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+    addMessage({ role: 'assistant', content: '' });
 
     try {
       const response = await fetch('/api/ai/query', {
@@ -107,27 +114,12 @@ const ChatPage: React.FC = () => {
           const chunk = decoder.decode(value, { stream: true });
           assistantContent += chunk;
           
-          setMessages(prev => {
-            const updated = [...prev];
-            updated[updated.length - 1] = { 
-              ...updated[updated.length - 1], 
-              content: assistantContent,
-              suggestedDocs: suggestedDocIds
-            };
-            return updated;
-          });
+          updateLastMessage(assistantContent, suggestedDocIds);
         }
       }
     } catch (error) {
       console.error(error);
-      setMessages(prev => {
-        const updated = [...prev];
-        updated[updated.length - 1] = { 
-          role: 'assistant', 
-          content: "I'm sorry, I encountered an error connecting to the AI service. Please make sure the local LLM is running." 
-        };
-        return updated;
-      });
+      updateLastMessage("I'm sorry, I encountered an error connecting to the AI service. Please make sure the local LLM is running.");
     } finally {
       setIsLoading(false);
     }
@@ -167,13 +159,22 @@ const ChatPage: React.FC = () => {
               </p>
             </div>
           </div>
-          <button 
-            onClick={exportChat}
-            className="p-2 hover:bg-white rounded-lg transition-colors text-gray-400 hover:text-primary-600"
-            title="Export Conversation"
-          >
-            <Download className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={exportChat}
+              className="p-2 hover:bg-white rounded-lg transition-colors text-gray-400 hover:text-primary-600"
+              title="Export Conversation"
+            >
+              <Download className="w-5 h-5" />
+            </button>
+            <button 
+              onClick={clearChat}
+              className="p-2 hover:bg-white rounded-lg transition-colors text-gray-400 hover:text-red-600"
+              title="Clear Conversation"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+          </div>
         </header>
 
         {/* Messages */}

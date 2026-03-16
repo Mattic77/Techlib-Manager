@@ -14,9 +14,12 @@ api.interceptors.request.use((config) => {
 });
 
 export const authApi = {
-  login: (data: FormData) => api.post('/users/login', data),
+  login: (data: URLSearchParams) => api.post('/users/login', data),
   register: (data: any) => api.post('/users/register', data),
   getMe: () => api.get('/users/me'),
+  updateMe: (data: any) => api.put('/users/me', data),
+  listUsers: () => api.get('/users'),
+  updateUserRole: (userId: string, role: string) => api.put(`/users/${userId}/role`, null, { params: { role } }),
 };
 
 export const documentApi = {
@@ -25,9 +28,12 @@ export const documentApi = {
   create: (data: any) => api.post('/documents', data),
   update: (id: string, data: any) => api.put(`/documents/${id}`, data),
   delete: (id: string) => api.delete(`/documents/${id}`),
+  getStats: () => api.get('/documents/stats'),
+  toggleArchive: (id: string) => api.post(`/documents/${id}/toggle-archive`),
 };
 
 export const loanApi = {
+  list: () => api.get('/loans'),
   create: (data: any) => api.post('/loans', data),
   return: (id: string) => api.put(`/loans/${id}/return`),
   myLoans: () => api.get('/loans/my-loans'),
