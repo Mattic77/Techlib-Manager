@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useEffect } from 'react';
 import { useAuthStore } from './store/authStore';
 import { useSettingsStore } from './store/settingsStore';
+import { useChatStore } from './store/chatStore';
 import { useQueryClient } from '@tanstack/react-query';
 
 import DashboardPage from './pages/DashboardPage';
@@ -31,8 +32,14 @@ const ProtectedRoute = ({ children, requireAdmin = false }: { children: React.Re
 };
 
 function App() {
+  const { user } = useAuthStore();
+  const { setUserId } = useChatStore();
   const { isEcoMode } = useSettingsStore();
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    setUserId(user?.id || null);
+  }, [user?.id, setUserId]);
 
   useEffect(() => {
     // Inject/remove .eco-mode class on body
