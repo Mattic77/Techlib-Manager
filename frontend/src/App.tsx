@@ -1,5 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { useAuthStore } from './store/authStore';
+import { useSettingsStore } from './store/settingsStore';
+import { useQueryClient } from '@tanstack/react-query';
 
 import DashboardPage from './pages/DashboardPage';
 import CatalogPage from './pages/CatalogPage';
@@ -28,6 +31,26 @@ const ProtectedRoute = ({ children, requireAdmin = false }: { children: React.Re
 };
 
 function App() {
+  const { isEcoMode } = useSettingsStore();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    // Inject/remove .eco-mode class on body
+    if (isEcoMode) {
+      document.body.classList.add('eco-mode');
+    } else {
+      document.body.classList.remove('eco-mode');
+    }
+
+    // Update React Query defaults
+    queryClient.setDefaultOptions({
+      queries: {
+        refetchOnWindowFocus: !isEcoMode,
+        refetchOnReconnect: !isEcoMode,
+      },
+    });
+  }, [isEcoMode, queryClient]);
+
   return (
     <Router>
       <Routes>

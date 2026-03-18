@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { useSettingsStore } from '../store/settingsStore';
 import { 
   Home, 
   Library, 
@@ -12,7 +13,8 @@ import {
   LayoutDashboard,
   ShieldCheck,
   History,
-  Users as UsersIcon
+  Users as UsersIcon,
+  Zap
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -28,6 +30,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user, logout } = useAuthStore();
+  const { isEcoMode, toggleEcoMode } = useSettingsStore();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -103,10 +106,34 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           )}
         </div>
 
-        <div className="p-4 border-t border-primary-800">
+        <div className="p-4 border-t border-primary-800 space-y-2">
+          {/* Economic Mode Toggle */}
+          <button
+            onClick={toggleEcoMode}
+            className={cn(
+              "w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-colors",
+              isEcoMode ? "bg-primary-800/50 text-yellow-400" : "text-primary-400 hover:bg-primary-800/30 hover:text-white"
+            )}
+            title="Enable Economic Mode to disable animations and reduce data usage"
+          >
+            <div className="flex items-center gap-3">
+              <Zap className={cn("w-5 h-5 transition-transform", isEcoMode && "scale-110")} />
+              <span className="text-sm font-medium">Economic Mode</span>
+            </div>
+            <div className={cn(
+              "w-8 h-4 rounded-full relative transition-colors",
+              isEcoMode ? "bg-yellow-400" : "bg-primary-700"
+            )}>
+              <div className={cn(
+                "absolute top-1 w-2 h-2 rounded-full bg-primary-900 transition-all",
+                isEcoMode ? "left-5" : "left-1"
+              )} />
+            </div>
+          </button>
+
           <Link
             to="/profile"
-            className="flex items-center gap-3 px-4 py-3 mb-2 rounded-xl hover:bg-primary-800 transition-colors group"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary-800 transition-colors group"
           >
             <div className="w-8 h-8 rounded-full bg-primary-700 flex items-center justify-center group-hover:bg-primary-600 transition-colors">
               <UserIcon className="w-5 h-5" />
@@ -129,13 +156,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto relative">
         <header className="sticky top-0 z-10 bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
-           <div className="relative w-96">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input 
-                type="text" 
-                placeholder="Search catalog..." 
-                className="w-full pl-10 pr-4 py-2 bg-gray-100 border-transparent rounded-full text-sm focus:bg-white focus:ring-2 focus:ring-primary-500 outline-none transition-all"
-              />
+           <div className="flex items-center gap-6">
+              <div className="relative w-96">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input 
+                  type="text" 
+                  placeholder="Search catalog..." 
+                  className="w-full pl-10 pr-4 py-2 bg-gray-100 border-transparent rounded-full text-sm focus:bg-white focus:ring-2 focus:ring-primary-500 outline-none transition-all"
+                />
+              </div>
+              {isEcoMode && (
+                <span className="bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-1 rounded border border-yellow-200 uppercase tracking-tighter">
+                  Lite Mode Active
+                </span>
+              )}
            </div>
         </header>
         <div className="p-8">

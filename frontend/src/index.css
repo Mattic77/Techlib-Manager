@@ -7,3 +7,42 @@
     @apply bg-gray-50 text-primary-900;
   }
 }
+
+/* Economic Mode (Lite Mode) */
+.eco-mode *, 
+.eco-mode *::before, 
+.eco-mode *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+.eco-mode .animate-pulse {
+  animation: none !important;
+  opacity: 1 !important;
+  background-color: #f3f4f6 !important; /* Static light gray */
+}
+
+.eco-mode .animate-spin {
+  animation: none !important;
+}
+
+/* Drastic visual simplification for Lite Mode */
+.eco-mode .shadow-sm,
+.eco-mode .shadow-md,
+.eco-mode .shadow-lg,
+.eco-mode .shadow-xl,
+.eco-mode .shadow-2xl,
+.eco-mode .shadow-inner {
+  box-shadow: none !important;
+  border: 1px solid #e5e7eb !important; /* Replace shadow with a simple thin border */
+}
+
+.eco-mode body {
+  background-color: #ffffff !important; /* Pure white background to reduce complexity */
+}
+
+.eco-mode .bg-white {
+  background-color: #fafafa !important; /* Slightly off-white for cards to stay distinct without shadows */
+}
